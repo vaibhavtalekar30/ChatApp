@@ -1,4 +1,5 @@
-import "./config/env.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 import express from "express";
 import cors from "cors";
@@ -14,10 +15,11 @@ import { initializeSocket } from "./services/socketService.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 
+console.log("MONGO_URI:", process.env.MONGO_URI);
 connectDB();
 
 const app = express();
-app.use(cors({ origin: process.env.CLIENT_URL }));
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
@@ -30,7 +32,10 @@ app.use(errorHandler);
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: { origin: process.env.CLIENT_URL }
+  cors: { origin: ["http://192.168.0.100:5173"] ,
+  methods: ["GET", "POST"],
+  credentials: true,
+  }
 });
 
 initializeSocket(io);

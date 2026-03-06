@@ -139,7 +139,7 @@ const Dashboard = () => {
 
   const fetchChats = useCallback(async () => {
     try {
-      const { data } = await axios.get("http://localhost:5000/api/chat", {
+      const { data } = await axios.get("http://192.168.0.100:5000/api/chat", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setChats(data);
@@ -154,7 +154,7 @@ const Dashboard = () => {
   const handleSearch = async () => {
     if (!search.trim()) { setSearchResults([]); return; }
     try {
-      const { data } = await axios.get(`http://localhost:5000/api/users?search=${search}`, {
+      const { data } = await axios.get(`http://192.168.0.100:5000/api/users?search=${search}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSearchResults(data);
