@@ -167,7 +167,12 @@ function ChatBox({ chat, currentUser, onClose }) {
       {/* ================= Header ================= */}
       <div className="flex-shrink-0 flex items-center justify-between border-b p-3 bg-white">
         <button onClick={onClose} className="text-gray-600">← Close</button>
-        <h3 className="font-semibold">{otherUsername || "Chat"}</h3>
+
+        <h3 className="font-semibold">
+          {chat.isGroupChat
+            ? chat.chatName
+            : otherUsername || chat.users.find(u => u._id !== currentUser._id)?.username || "Chat"}
+        </h3>
       </div>
 
       {/* ================= Messages ================= */}
@@ -176,6 +181,12 @@ function ChatBox({ chat, currentUser, onClose }) {
           const isMe = m.sender?._id === user._id;
           return (
             <div key={m._id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
+              {/* ✅ SHOW SENDER NAME IN GROUP */}
+      {chat.isGroupChat && !isMe && (
+        <span className="text-xs text-gray-600 mb-1 ml-1">
+          {m.sender?.username || "Unknown"}
+        </span>
+      )}
               <div className={`px-4 py-2 rounded-2xl max-w-xs md:max-w-md break-words text-sm shadow
                 ${isMe ? "bg-blue-400 text-black rounded-br-sm" : "bg-green-400 text-black rounded-bl-sm"}`}>
                 {m.content}

@@ -4,6 +4,8 @@ import Navbar from "../components/Navbar";
 import UserList from "../components/UserList";
 import ChatBox from "../components/ChatBox";
 import socket from "../socket/socket";
+import CreateGroupModal from "../components/CreateGroupModal";
+import { useRef } from "react";
 
 
 const Dashboard = () => {
@@ -11,10 +13,15 @@ const Dashboard = () => {
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
-
+  const [showGroupModal, setShowGroupModal] = useState(false);
 
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user"));
+  const selectedChatRef = useRef();
+
+useEffect(() => {
+  selectedChatRef.current = selectedChat;
+}, [selectedChat]);
 
   useEffect(() => {
 
@@ -30,34 +37,6 @@ const Dashboard = () => {
       });
     });
 
-    // NEW: update latest message
-    /* socket.on("messageReceived", (newMessage) => {
- 
-       setChats(prevChats => {
- 
-         const updated = prevChats.map(chat => {
- 
-           if (chat._id === newMessage.chatId) {
-             return {
-               ...chat,
-               latestMessage: newMessage
-             };
-           }
- 
-           return chat;
-         });
- 
-         const index = updated.findIndex(c => c._id === newMessage.chatId);
- 
-         if (index !== -1) {
-           const chat = updated.splice(index, 1)[0];
-           updated.unshift(chat);
-         }
- 
-         return updated;
-       });
- 
-     }); */
 
     socket.on("messageReceived", (newMessage) => {
 
@@ -70,7 +49,7 @@ const Dashboard = () => {
 
           if (chat._id !== messageChatId) return chat;
 
-          const isChatOpen = selectedChat?._id === chat._id;
+      const isChatOpen = selectedChatRef.current?._id === chat._id;
 
           const senderId =
             typeof newMessage.sender === "object"
@@ -97,7 +76,12 @@ const Dashboard = () => {
         });
 
         // Move chat to top
-        const index = updatedChats.findIndex(c => c._id === newMessage.chatId);
+        const messageChatId =
+          newMessage.chat?._id || newMessage.chatId;
+
+        const index = updatedChats.findIndex(
+          c => c._id === messageChatId
+        );
 
         if (index !== -1) {
           const chat = updatedChats.splice(index, 1)[0];
@@ -135,9 +119,24 @@ const Dashboard = () => {
       socket.off("messageReceived");
     };
 
-  }, [user, selectedChat]);
+  }, [user]);
 
+  const getChatUsers = () => {
+    const allUsers = [];
 
+    chats.forEach(chat => {
+      chat.users.forEach(u => {
+        if (u._id !== user._id) {
+          allUsers.push(u);
+        }
+      });
+    });
+
+    // remove duplicates
+    return Array.from(
+      new Map(allUsers.map(u => [u._id, u])).values()
+    );
+  };
 
 
   const fetchChats = useCallback(async () => {
@@ -196,11 +195,22 @@ const Dashboard = () => {
     };
 
   }, []);
+
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       {/* Navbar */}
       <Navbar />
-
+      {showGroupModal && (
+        <CreateGroupModal
+          token={token}
+          users={getChatUsers()}
+          onClose={() => setShowGroupModal(false)}
+          onGroupCreated={(group) => {
+            setChats(prev => [group, ...prev]);
+          }}
+        />
+      )}
       <div className="flex flex-1 h-full">
         {/* Sidebar */}
 
@@ -247,51 +257,15 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* Recent Chats */}
-          { /* <div className="flex-1 overflow-y-auto">
-            <h3 className="font-semibold mb-2">Recent Chats</h3>
-            {chats.length === 0 && <p>No chats yet</p>}
-
-            {chats.map((chat) => {
-              const otherUser = chat.users.find((u) => u._id !== user._id);
-              const isSelected = selectedChat?._id === chat._id;
-              return (
-                <div
-                  key={chat._id}
-                  onClick={() => setSelectedChat(chat)}
-                  className={`p-2 cursor-pointer border-b rounded ${isSelected ? "bg-gray-200" : "hover:bg-gray-100"
-                    }`}
-                >
-                  <strong>{otherUser?.username}</strong>
-                  <div className="flex items-center justify-between">
-
-                    <p
-                      className={`text-sm truncate ${chat.latestMessage &&
-                          chat.latestMessage.sender !== user._id &&
-                          !chat.latestMessage.seen
-                          ? "font-bold text-black"
-                          : "text-gray-500"
-                        }`}
-                    >
-                      {chat.latestMessage?.content || "No messages yet"}
-                    </p>
-
-                    {chat.latestMessage?.sender === user._id && (
-                      <span
-                        className={`w-2 h-2 rounded-full border ml-2 ${chat.latestMessage.seen
-                            ? "bg-green-500 border-green-500"
-                            : "border-gray-500"
-                          }`}
-                      />
-                    )}
-
-                  </div>
-                </div>
-              );
-            })}
-          </div>*/}
 
           <div className="flex-1 overflow-y-auto">
+
+            <button
+              onClick={() => setShowGroupModal(true)}
+              className="mb-3 p-2 bg-blue-500 text-white rounded"
+            >
+              + Create Group
+            </button>
             <h3 className="font-semibold mb-2 px-3">Recent Chats</h3>
 
             {chats.length === 0 && (
@@ -300,6 +274,9 @@ const Dashboard = () => {
 
             {chats.map((chat) => {
               const otherUser = chat.users.find((u) => u._id !== user._id);
+              const chatName = chat.isGroupChat
+                ? chat.chatName
+                : otherUser?.username;
               const isSelected = selectedChat?._id === chat._id;
 
               const latest = chat.latestMessage;
@@ -344,7 +321,7 @@ const Dashboard = () => {
 
                   {/* Username */}
                   <strong className="text-sm text-gray-800">
-                    {otherUser?.username}
+                    {chatName}
                   </strong>
 
                   {/* Message Row */}

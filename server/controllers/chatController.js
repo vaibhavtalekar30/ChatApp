@@ -224,3 +224,38 @@ export const accessChat = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+/**
+ * @route   POST /api/group
+ * @desc    creating new group chat
+ */
+
+export const createGroupChat = async (req, res) => {
+  try {
+    const { name, users } = req.body;
+
+    if (!name || !users || users.length < 2) {
+      return res.status(400).json({ message: "Invalid group data" });
+    }
+
+    const allUsers = [...users, req.user._id];
+
+    const groupChat = await Chat.create({
+      chatName: name,
+      isGroupChat: true,
+      users: allUsers,
+      groupAdmin: req.user._id
+    });
+
+    const fullChat = await Chat.findById(groupChat._id)
+      .populate("users", "-password")
+      .populate("groupAdmin", "-password");
+
+    res.status(201).json(fullChat);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
