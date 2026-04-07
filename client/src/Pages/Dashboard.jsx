@@ -11,8 +11,8 @@ const Dashboard = () => {
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
-  
-  
+
+
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -65,7 +65,10 @@ const Dashboard = () => {
 
         const updatedChats = prevChats.map(chat => {
 
-          if (chat._id !== newMessage.chatId) return chat;
+          const messageChatId =
+            newMessage.chat?._id || newMessage.chatId;
+
+          if (chat._id !== messageChatId) return chat;
 
           const isChatOpen = selectedChat?._id === chat._id;
 
@@ -139,7 +142,7 @@ const Dashboard = () => {
 
   const fetchChats = useCallback(async () => {
     try {
-      const { data } = await axios.get("http://192.168.0.100:5000/api/chat", {
+      const { data } = await axios.get("http://localhost:5000/api/chat", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setChats(data);
@@ -154,7 +157,7 @@ const Dashboard = () => {
   const handleSearch = async () => {
     if (!search.trim()) { setSearchResults([]); return; }
     try {
-      const { data } = await axios.get(`http://192.168.0.100:5000/api/users?search=${search}`, {
+      const { data } = await axios.get(`http://localhost:5000/api/users?search=${search}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSearchResults(data);
