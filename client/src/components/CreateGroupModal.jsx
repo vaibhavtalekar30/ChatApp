@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../api/axios";
 import socket from "../socket/socket";
 
 const CreateGroupModal = ({
@@ -23,7 +23,7 @@ const CreateGroupModal = ({
 
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/users?search=${search}`,
+          `/users?search=${search}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -68,7 +68,7 @@ const CreateGroupModal = ({
 
     try {
       const { data } = await axios.post(
-       "http://localhost:5000/api/chat/group",
+       "chat/group",
         {
           name: groupName,
           users: selectedUsers.map((u) => u._id),

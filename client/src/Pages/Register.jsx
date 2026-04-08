@@ -10,10 +10,23 @@ function Register() {
 
   const submit = async (e) => {
     e.preventDefault(); // prevent page reload
+    if (!username || !email || !password) {
+    alert("Please fill in all fields");
+    return;
+  }
+   if (password.length < 6) {
+    alert("Password must be at least 6 characters long");
+    return;
+  }
     try {
       await axios.post("/auth/register", { username, email, password });
+      alert("Registration successful! Please login.");
       navigate("/");
     } catch (error) {
+       const message =
+      error.response?.data?.message || "Registration failed";
+
+    alert(message);
       console.error("Registration failed", error.response?.data || error);
     }
   };
@@ -31,6 +44,7 @@ function Register() {
         <input
           placeholder="Username"
           value={username}
+          required
           onChange={(e) => setUsername(e.target.value)}
           className="w-full mb-4 p-3 border border-gray-300 rounded"
         />
@@ -39,6 +53,7 @@ function Register() {
           type="email"
           placeholder="Email"
           value={email}
+          required
           onChange={(e) => setEmail(e.target.value)}
           className="w-full mb-4 p-3 border border-gray-300 rounded"
         />
@@ -47,6 +62,7 @@ function Register() {
           type="password"
           placeholder="Password"
           value={password}
+          required
           onChange={(e) => setPassword(e.target.value)}
           className="w-full mb-6 p-3 border border-gray-300 rounded"
         />

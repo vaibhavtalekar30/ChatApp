@@ -11,12 +11,19 @@ function Login() {
 
   const submit = async (e) => {
     e.preventDefault(); // prevents page refresh
-
+    if (!email || !password) {
+    alert("Please fill in all fields");
+    return;
+  }
     try {
       const { data } = await axios.post("/auth/login", { email, password });
       login(data);
       navigate("/dashboard");
     } catch (error) {
+       const message =
+      error.response?.data?.message || "Invalid email or password";
+
+    alert(message);
       console.error("Login error", error.response?.data || error);
     }
   };
@@ -37,6 +44,7 @@ function Login() {
           type="email"
           placeholder="Email"
           value={email}
+          required
           onChange={(e) => setEmail(e.target.value)}
           className="w-full mb-4 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
@@ -45,6 +53,7 @@ function Login() {
           type="password"
           placeholder="Password"
           value={password}
+          required
           onChange={(e) => setPassword(e.target.value)}
           className="w-full mb-6 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
         />

@@ -6,9 +6,11 @@ import ChatBox from "../components/ChatBox";
 import socket from "../socket/socket";
 import CreateGroupModal from "../components/CreateGroupModal";
 import { useRef } from "react";
+import instance from "../api/axios";
 
 
 const Dashboard = () => {
+  
   const [chats, setChats] = useState([]);
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -141,7 +143,7 @@ useEffect(() => {
 
   const fetchChats = useCallback(async () => {
     try {
-      const { data } = await axios.get("http://localhost:5000/api/chat", {
+      const { data } = await instance.get(`/chat`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setChats(data);
@@ -156,7 +158,7 @@ useEffect(() => {
   const handleSearch = async () => {
     if (!search.trim()) { setSearchResults([]); return; }
     try {
-      const { data } = await axios.get(`http://localhost:5000/api/users?search=${search}`, {
+      const { data } = await instance.get(`users?search=${search}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSearchResults(data);
@@ -224,6 +226,11 @@ useEffect(() => {
               placeholder="Search users..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+               onKeyDown={(e) => {
+      if (e.key === "Enter") {
+        handleSearch();
+      }
+    }}
               className="flex-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-0"
             />
             <button
