@@ -22,7 +22,8 @@ const app = express();
 app.use(cors({  
   origin: "https://chat-app-5lx4.vercel.app",
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true }));
+  credentials: true,
+}));
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
@@ -41,7 +42,7 @@ const io = new Server(server, {
   }
 });
 
-//initializeSocket(io);
+initializeSocket(io);
 
 server.listen(process.env.PORT, () =>
   console.log(`Server running on port ${process.env.PORT}`)
