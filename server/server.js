@@ -32,7 +32,7 @@ app.use(errorHandler);
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: { origin: ["http://localhost:5173"] ,
+  cors: { origin: ["https://chat-app-5lx4.vercel.app"] ,
   methods: ["GET", "POST"],
   credentials: true,
   }
