@@ -14,10 +14,14 @@ export const initializeSocket = (io) => {
     });
 
     socket.on("newChat", (data) => {
+      if (!data?.users || !Array.isArray(data.users)) return;
+
       data.users.forEach((user) => {
+       if (user?._id) {
         io.to(user._id).emit("chatCreated", data);
-      });
-    });
+        }
+       });
+     });
 
     socket.on("messagesSeen", ({ chatId }) => {
       socket.to(chatId).emit("messagesSeen", {
