@@ -5,7 +5,7 @@ const SOCKET_SERVER_URL = import.meta.env.VITE_API_URL;
 
 // Connect to socket.io server with reliable options
 const socket = io(SOCKET_SERVER_URL, {
- // transports: ["websocket"], // force WebSocket (avoids polling issues over network)
+  transports: ["websocket"], // force WebSocket (avoids polling issues over network)
   reconnection: true,        // enable reconnections
   reconnectionAttempts: 10,  // try reconnecting 10 times
   reconnectionDelay: 1000,   // wait 1s between attempts
