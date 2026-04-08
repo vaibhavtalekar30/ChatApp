@@ -19,7 +19,10 @@ console.log("MONGO_URI:", process.env.MONGO_URI);
 connectDB();
 
 const app = express();
-app.use(cors({ origin: "*" }));
+app.use(cors({  
+  origin: "https://chat-app-5lx4.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true }));
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
